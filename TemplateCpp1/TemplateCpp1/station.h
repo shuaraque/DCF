@@ -10,6 +10,10 @@ using namespace std;
 #define CW_0 4 // CW0 4 slots
 #define CW_MAX 1024 // CW MAX 1024 slots
 #define SIM_TIME 1000000 // simulation time 1M slots
+#define Data_Frame_Size 100 // 100 slots
+#define ACK 2 // 2 slots
+#define RTS 2 // 2 slots
+#define CTS 2 // 2 slots
 
 class station {
 
@@ -35,33 +39,6 @@ protected:
 	int numSuccesses;// counter for successes
 
 };
-
-/*--------------------------------------------------------------------------------*/
-
-//class station_A : public station {
-//
-//public:
-//
-//	
-//
-//
-//private:
-//
-//
-//};
-///*--------------------------------------------------------------------------------*/
-//
-//class station_C : public station {
-//
-//public:
-//
-//
-//
-//
-//private:
-//
-//
-//};
 
 
 
