@@ -2,7 +2,7 @@
 #include "station.h"
 #include <random>
 
-void station::selectBackoffTime(int CW_value) {
+void station::selectBackoffTime(int CW_value) { // test
 	// generating random number for backoff time between (0 and CW-1)
 	std::random_device rd;
 	std::mt19937 e2(rd());
