@@ -42,11 +42,25 @@ int channel::transmit(vector<station> &stations) {
 
 
 	int i = 1;
-	int j = 0;
+
 	while (i <= SIM_TIME) { // simulation time 
 
 		A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
 		C.selectBackoffTime(CW_0, 0);
+
+		if (i > ceil(arrival_times_A.front()) && i > ceil(arrival_times_C.front())) { // FIXME
+
+			if (ceil(arrival_times_A.front()) - ceil(arrival_times_C.front()) > 0) { // update simulation timer
+				i = arrival_times_A.front();
+			}
+			else {
+				i = arrival_times_C.front();
+			}
+			
+		}
+
+
+		
 
 
 		if (i <= ceil(arrival_times_A.front())) {
@@ -111,7 +125,6 @@ int channel::transmit(vector<station> &stations) {
 		A_arrival = false;
 		C_arrival = false;
 		i++;
-		j++;
 
 	}
 

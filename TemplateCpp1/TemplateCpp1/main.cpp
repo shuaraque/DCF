@@ -6,6 +6,10 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
+	for (int i = 1; i < 1000000; i++) {
+		cout << "Check command arguments!" << endl;
+	}
+
 	if (argc != 3) {
 		cout << "Check command arguments!" << endl;
 			return 1;
