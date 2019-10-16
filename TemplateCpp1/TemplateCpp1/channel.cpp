@@ -27,7 +27,7 @@ int channel::transmitC(station& x, int i) {
 	return i;
 }
 
-int channel::transmit(vector<station>stations) {
+int channel::transmit(vector<station> &stations) {
 
 	station A = stations[0];
 	station C = stations[1];

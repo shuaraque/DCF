@@ -7,4 +7,23 @@
 using namespace std;
 
 
-int readFile(string inputFile1, string inputFile2);
+
+class data1  {
+
+public:
+	data1() {
+
+	};
+	int readFile(string inputFile1, string inputFile2);
+
+	int startSimulation();
+
+
+private:
+
+	vector <station> Stations_with_arrivals;
+	channel obj;
+
+
+
+};

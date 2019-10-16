@@ -1,7 +1,7 @@
 #include"data.h"
 
 
-int readFile(string inputFile1, string inputFile2) {
+int data1::readFile(string inputFile1, string inputFile2) {
 	station A;
 	station C;
 	double time = 0.0;
@@ -29,8 +29,18 @@ int readFile(string inputFile1, string inputFile2) {
 
 	}
 
+	Stations_with_arrivals.push_back(A);
+	Stations_with_arrivals.push_back(C);
 	inFile1.close();
 	inFile2.close();
+
+	return 0;
+}
+
+
+int data1::startSimulation() {
+
+	obj.transmit(Stations_with_arrivals);
 
 	return 0;
 }

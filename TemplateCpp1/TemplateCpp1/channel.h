@@ -15,7 +15,7 @@ public:
 	}
 	void SetStatus(status x) { this->ch_status = x; }// set to Idle or Busy
 	status GetStatus() { return this->ch_status; }// return the state
-	int transmit(vector<station>stations);
+	int transmit(vector<station> &stations);
 	int transmitS(station& x, int i);
 	int transmitC(station& x, int i);
 
