@@ -21,7 +21,7 @@ public:
 	station() {
 
 	}
-	void selectBackoffTime(int CE_value); // initialize backoff with random value
+	void selectBackoffTime(int CE_value, int numCollision); // initialize backoff with random value
 	void SetBackoffTime(int time) { this->backoffTime = time; }
 	int  GetBackoffTime() { return this->backoffTime; }
 	void backoffCountDown() { this->backoffTime = this->backoffTime - 1; }

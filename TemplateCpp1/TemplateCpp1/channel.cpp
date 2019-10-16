@@ -14,16 +14,17 @@ int channel::transmitS(station& x, int i) {
 
 	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
 	x.success();
-
+	this->collision = false;
 	return i;
 }
 int channel::transmitC(station& x, int i) {
 
 	//i += DIFS; // sence the channel for DIFS
 
+	i += x.GetBackoffTime(); // Backoff time
 	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
 	x.collision();
-
+	this->collision = true;
 	return i;
 }
 
@@ -37,8 +38,8 @@ int channel::transmit(vector<station> &stations) {
 	vector<double> arrival_times_A = A.GetArrivals();
 	vector<double> arrival_times_C = C.GetArrivals();
 
-	A.selectBackoffTime(CW_0); // select a random backoff time between 0 and 3
-	C.selectBackoffTime(CW_0);
+	A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
+	C.selectBackoffTime(CW_0, 0);
 
 	int i = 1;
 	int j = 0;
@@ -51,17 +52,17 @@ int channel::transmit(vector<station> &stations) {
 			C_arrival = true;
 		}
 
-		if (A_arrival == true && C_arrival == false) {
+		if (A_arrival == true && C_arrival == false) { // A gets the channel
 
 			i = this->transmitS(A, i); // function for successful transmision
 
 		}
-		if (C_arrival == true && A_arrival == false) {
+		if (C_arrival == true && A_arrival == false) {  // C gets the channel
 
 			i = this->transmitS(C, i);
 		}
 
-		if (C_arrival == true && C_arrival == true) {
+		if (C_arrival == true && C_arrival == true) {   // A and C tries to grab the channel
 
 			//i += DIFS; // both sence the channel for DIFS
 
@@ -74,7 +75,11 @@ int channel::transmit(vector<station> &stations) {
 				i = this->transmitS(A, i); // A transmits
 			}
 			else if (A.GetBackoffTime() == C.GetBackoffTime()) {
-
+				while (A.GetBackoffTime() == C.GetBackoffTime()) {
+					this->transmitC(A, i); // collision No ACK received
+					i = this->transmitC(C, i); // collision No ACK received
+				//	A.selectBackoffTime()
+				}
 			}
 
 
