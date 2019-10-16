@@ -2,6 +2,31 @@
 #include "station.h"
 
 
+
+int channel::transmitS(station& x, int i) {
+	
+	i += DIFS; // sence the channel for DIFS
+
+	if (this->ch_status != Busy) {
+
+		i += x.GetBackoffTime(); // Backoff time
+	}
+
+	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
+	x.success();
+
+	return i;
+}
+int channel::transmitC(station& x, int i) {
+
+	//i += DIFS; // sence the channel for DIFS
+
+	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
+	x.collision();
+
+	return i;
+}
+
 int channel::transmit(vector<station>stations) {
 
 	station A = stations[0];
@@ -12,79 +37,55 @@ int channel::transmit(vector<station>stations) {
 	vector<double> arrival_times_A = A.GetArrivals();
 	vector<double> arrival_times_C = C.GetArrivals();
 
+	A.selectBackoffTime(CW_0); // select a random backoff time between 0 and 3
+	C.selectBackoffTime(CW_0);
 
-	A.SetBackoffTime(CW_0);
-	C.SetBackoffTime(CW_0);
 	int i = 1;
 	int j = 0;
-	while (i <= SIM_TIME) {
+	while (i <= SIM_TIME) { // simulation time 
 
-		if (i == ceil(arrival_times_A[0])) {
+		if (i <= ceil(arrival_times_A[j])) {
 			A_arrival = true;
 		}
-		if (i == ceil(arrival_times_C[0])) {
+		if (i <= ceil(arrival_times_C[j])) {
 			C_arrival = true;
 		}
 
-		if (A_arrival == true) {
-			if ((i - ceil(arrival_times_A[0]) < DIFS)) {
-				continue;
-			}
-			else {
-					A.backoffCountDown();
+		if (A_arrival == true && C_arrival == false) {
 
-			}
+			i = this->transmitS(A, i); // function for successful transmision
+
+		}
+		if (C_arrival == true && A_arrival == false) {
+
+			i = this->transmitS(C, i);
 		}
 
-		if (C_arrival == true) {
-			if ((i - ceil(arrival_times_C[0]) < DIFS)) {
-				continue;
+		if (C_arrival == true && C_arrival == true) {
+
+			//i += DIFS; // both sence the channel for DIFS
+
+			if (A.GetBackoffTime() - C.GetBackoffTime() > 0) { // A has larger backoff time, A freezes and C transmit
+				A.SetBackoffTime(A.GetBackoffTime() - C.GetBackoffTime());// freeze A
+				i = this->transmitS(C, i); // C transmits
 			}
-			else {
-				C.backoffCountDown();
+			else if (A.GetBackoffTime() - C.GetBackoffTime() < 0) { // C has larger backoff time
+				C.SetBackoffTime(C.GetBackoffTime() - A.GetBackoffTime()); // freeze C
+				i = this->transmitS(A, i); // A transmits
+			}
+			else if (A.GetBackoffTime() == C.GetBackoffTime()) {
 
 			}
+
+
+
 		}
-
-		if (A.GetBackoffTime() == 0) {
-			// A start transmitting 
-		}
-
-
-
-
-
-		
-			
-			
-		
-
-		// first sense the channel for DIFS slots 
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-
-		
-	
-		
-		if (C.GetBackoffTime() == 0) {
-			// C start transmitting 
-		}
-		
+		A_arrival = false;
+		C_arrival = false;
 		i++;
+		j++;
+
 	}
-
-
-	
-
 
 
 

@@ -32,4 +32,5 @@ int readFile(string inputFile1, string inputFile2) {
 	inFile1.close();
 	inFile2.close();
 
+	return 0;
 }
