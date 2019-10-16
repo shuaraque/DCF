@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <math.h> 
+#include <queue>
 using namespace std;
 
 #define SIFS 1 // one slot
@@ -25,8 +26,8 @@ public:
 	void SetBackoffTime(int time) { this->backoffTime = time; }
 	int  GetBackoffTime() { return this->backoffTime; }
 	void backoffCountDown() { this->backoffTime = this->backoffTime - 1; }
-	void SetArrivals(double arrival) { this->arrivals.push_back(arrival); }
-	vector <double> GetArrivals() { return this->arrivals; }
+	void SetArrivals(double arrival) { this->arrivals.push(arrival); }
+	queue <double> GetArrivals() { return this->arrivals; }
 	void success() { this->numSuccesses++; }
 	void collision() { this->numCollisions++; }
 	int GetnumSuccesses() { return this->numSuccesses; }
@@ -34,7 +35,7 @@ public:
 
 protected:
 	int backoffTime; // backoff time
-	vector <double> arrivals; // frames arrival times
+	queue <double> arrivals; // frames arrival times
 	int numCollisions;// counter for collisions
 	int numSuccesses;// counter for successes
 

@@ -3,6 +3,7 @@
 
 #include "station.h"
 #include <math.h> 
+#include <queue>
 typedef enum status_ch{
 	Idle, Busy
 }status;
@@ -12,7 +13,7 @@ class channel {
 public:
 	channel(){
 		this->ch_status = Idle;
-		collision = false;
+		collision = 0;
 	}
 	void SetStatus(status x) { this->ch_status = x; }// set to Idle or Busy
 	status GetStatus() { return this->ch_status; }// return the state
@@ -23,7 +24,7 @@ public:
 protected:
 	status ch_status; // channel status busy or idle
 
-	bool collision;
+	int collision;
 
 };
 

@@ -14,7 +14,7 @@ int channel::transmitS(station& x, int i) {
 
 	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
 	x.success();
-	this->collision = false;
+	this->collision = 0;
 	return i;
 }
 int channel::transmitC(station& x, int i) {
@@ -24,7 +24,7 @@ int channel::transmitC(station& x, int i) {
 	i += x.GetBackoffTime(); // Backoff time
 	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
 	x.collision();
-	this->collision = true;
+	this->collision += 1;
 	return i;
 }
 
@@ -35,20 +35,25 @@ int channel::transmit(vector<station> &stations) {
 	bool A_arrival = false;
 	bool C_arrival = false;
 
-	vector<double> arrival_times_A = A.GetArrivals();
-	vector<double> arrival_times_C = C.GetArrivals();
+	
+	queue<double> arrival_times_A = A.GetArrivals();
+	queue<double> arrival_times_C = C.GetArrivals();
 
-	A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
-	C.selectBackoffTime(CW_0, 0);
+
 
 	int i = 1;
 	int j = 0;
 	while (i <= SIM_TIME) { // simulation time 
 
-		if (i <= ceil(arrival_times_A[j])) {
+		A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
+		C.selectBackoffTime(CW_0, 0);
+
+
+		if (i <= ceil(arrival_times_A.front())) {
 			A_arrival = true;
 		}
-		if (i <= ceil(arrival_times_C[j])) {
+		if (i <= ceil(arrival_times_C.front())) {
+			//arrival_times_C.pop();
 			C_arrival = true;
 		}
 
@@ -69,16 +74,34 @@ int channel::transmit(vector<station> &stations) {
 			if (A.GetBackoffTime() - C.GetBackoffTime() > 0) { // A has larger backoff time, A freezes and C transmit
 				A.SetBackoffTime(A.GetBackoffTime() - C.GetBackoffTime());// freeze A
 				i = this->transmitS(C, i); // C transmits
+				arrival_times_C.pop(); // remove the first element
 			}
 			else if (A.GetBackoffTime() - C.GetBackoffTime() < 0) { // C has larger backoff time
 				C.SetBackoffTime(C.GetBackoffTime() - A.GetBackoffTime()); // freeze C
 				i = this->transmitS(A, i); // A transmits
+				arrival_times_A.pop(); // remove the first element
 			}
-			else if (A.GetBackoffTime() == C.GetBackoffTime()) {
+			else if (A.GetBackoffTime() == C.GetBackoffTime()) { // A and C have similar backoff times
+
 				while (A.GetBackoffTime() == C.GetBackoffTime()) {
 					this->transmitC(A, i); // collision No ACK received
 					i = this->transmitC(C, i); // collision No ACK received
-				//	A.selectBackoffTime()
+					A.selectBackoffTime(CW_0, this->collision);
+					C.selectBackoffTime(CW_0, this->collision);
+				}
+				if (A.GetBackoffTime() != C.GetBackoffTime()) {
+
+					if (A.GetBackoffTime() - C.GetBackoffTime() > 0) { // A has larger backoff time, A freezes and C transmit
+						A.SetBackoffTime(A.GetBackoffTime() - C.GetBackoffTime());// freeze A
+						i = this->transmitS(C, i); // C transmits
+						arrival_times_C.pop(); // remove the first element
+					}
+					else if (A.GetBackoffTime() - C.GetBackoffTime() < 0) { // C has larger backoff time
+						C.SetBackoffTime(C.GetBackoffTime() - A.GetBackoffTime()); // freeze C
+						i = this->transmitS(A, i); // A transmits
+						arrival_times_A.pop(); // remove the first element
+					}
+
 				}
 			}
 
