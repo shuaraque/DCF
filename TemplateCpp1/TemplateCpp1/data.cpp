@@ -57,13 +57,13 @@ int data1::writeToFile(string outFile) {
 	}
 	outF << "Station A successes= " << Stations_with_arrivals[0].GetnumSuccesses() << endl;
 	outF << "Station A collisions= " << Stations_with_arrivals[0].GetnumCollisions()<< endl;
-	outF << "A Throughput= " << ((double)Stations_with_arrivals[0].GetnumSuccesses()*12000.0 )/ double(SIM_TIME) << endl;
+	outF << "A Throughput= " << ((double)Stations_with_arrivals[0].GetnumSuccesses()*12000.0 )/ double(10) << endl;
 	outF << endl;
 	outF << "**********************************************************************************************" << endl;
 	outF << endl;
 	outF << "Station C successes= " << Stations_with_arrivals[1].GetnumSuccesses() << endl;
 	outF << "Station C collisions= " << Stations_with_arrivals[1].GetnumCollisions() << endl;
-	outF << "C Throughput= " << ((double)Stations_with_arrivals[1].GetnumSuccesses()*12000.0) / double(SIM_TIME) << endl;
+	outF << "C Throughput= " << ((double)Stations_with_arrivals[1].GetnumSuccesses()*12000.0) / double(10) << endl;
 
 	outF.close();
 

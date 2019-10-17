@@ -20,7 +20,10 @@ class station {
 
 public:
 	station() {
-
+		backoffTime = 0;
+		numCollisions = 0;
+		numSuccesses = 0;
+		collision_CW = 0;
 	}
 	void selectBackoffTime(int CE_value, int numCollision); // initialize backoff with random value
 	void SetBackoffTime(int time) { this->backoffTime = time; }
@@ -33,11 +36,15 @@ public:
 	int GetnumSuccesses() { return this->numSuccesses; }
 	int GetnumCollisions() { return this->numCollisions; }
 
+	void Setcollision_CW() { this->collision_CW += 1; }
+	void Resetcollision_CW() { this->collision_CW = 0; }
+	int Getcollision_CW() { return this->collision_CW; }
 protected:
 	int backoffTime; // backoff time
 	queue <double> arrivals; // frames arrival times
 	int numCollisions;// counter for collisions
 	int numSuccesses;// counter for successes
+	int collision_CW; 
 
 };
 

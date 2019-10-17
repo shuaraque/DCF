@@ -13,7 +13,7 @@ class channel {
 public:
 	channel(){
 		this->ch_status = Idle;
-		collision = 0;
+		
 	}
 	void SetStatus(status x) { this->ch_status = x; }// set to Idle or Busy
 	status GetStatus() { return this->ch_status; }// return the state
@@ -24,7 +24,7 @@ public:
 protected:
 	status ch_status; // channel status busy or idle
 
-	int collision;
+	
 
 };
 

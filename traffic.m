@@ -3,9 +3,9 @@
 %Step1:
 format short g
 
-lada=50;
+lada=50; % frame per second
 
-arrivals=5;
+arrivals=10*lada; %expecting "arrivals" frames
 
 U=rand(1,arrivals)
 
