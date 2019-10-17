@@ -29,7 +29,7 @@ int channel::transmitC(station& x, int i) {
 }
 
 int channel::transmit(vector<station> &stations) {
-
+	int i = 1;
 	station A = stations[0];
 	station C = stations[1];
 	bool A_arrival = false;
@@ -39,46 +39,59 @@ int channel::transmit(vector<station> &stations) {
 	queue<double> arrival_times_A = A.GetArrivals();
 	queue<double> arrival_times_C = C.GetArrivals();
 
+	if (ceil(arrival_times_A.front()) - ceil(arrival_times_C.front()) > 0) { // setting simulation timer
+		i = arrival_times_C.front(); // if arrival time of C is less that arrival time of A
+	}
+	else {
+		i = arrival_times_A.front(); // if arrival time of A is less that arrival time of C
+	}
 
-
-	int i = 1;
+	A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
+	C.selectBackoffTime(CW_0, 0);
 
 	while (i <= SIM_TIME) { // simulation time 
 
-		A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
-		C.selectBackoffTime(CW_0, 0);
 
-		if (i > ceil(arrival_times_A.front()) && i > ceil(arrival_times_C.front())) { // FIXME
 
-			if (ceil(arrival_times_A.front()) - ceil(arrival_times_C.front()) > 0) { // update simulation timer
-				i = arrival_times_A.front();
-			}
-			else {
-				i = arrival_times_C.front();
-			}
-			
+		//if (i < ceil(arrival_times_A.front()) && i < ceil(arrival_times_C.front())) {  // update simulation timer
+
+		//	if (ceil(arrival_times_A.front()) - ceil(arrival_times_C.front()) > 0) { // update simulation timer
+		//		i = arrival_times_C.front(); // if arrival time of C is less that arrival time of A
+		//		C_arrival = true;
+		//	}
+		//	else {
+		//		i = arrival_times_A.front(); // if arrival time of A is less that arrival time of C
+		//		A_arrival = true;
+		//	}
+
+		//}
+
+
+		if (arrival_times_A.size() !=0 && i >= ceil(arrival_times_A.front())) {
+			A_arrival = true; //  A has an arrival
+			//C_arrival = true;
+		}
+		if (arrival_times_C.size() != 0 && i >= ceil(arrival_times_C.front())) {
+			C_arrival = true;  // only has an arrival
 		}
 
-
-		
-
-
-		if (i <= ceil(arrival_times_A.front())) {
-			A_arrival = true;
+		if (A_arrival == false && C_arrival == false) {
+			i++;
+			continue;
 		}
-		if (i <= ceil(arrival_times_C.front())) {
-			//arrival_times_C.pop();
-			C_arrival = true;
-		}
+
 
 		if (A_arrival == true && C_arrival == false) { // A gets the channel
 
 			i = this->transmitS(A, i); // function for successful transmision
-
+			A.selectBackoffTime(CW_0, 0);
+			arrival_times_A.pop(); // remove the first element
 		}
 		if (C_arrival == true && A_arrival == false) {  // C gets the channel
 
 			i = this->transmitS(C, i);
+			C.selectBackoffTime(CW_0, 0);
+			arrival_times_C.pop(); // remove the first element
 		}
 
 		if (C_arrival == true && C_arrival == true) {   // A and C tries to grab the channel
@@ -88,11 +101,13 @@ int channel::transmit(vector<station> &stations) {
 			if (A.GetBackoffTime() - C.GetBackoffTime() > 0) { // A has larger backoff time, A freezes and C transmit
 				A.SetBackoffTime(A.GetBackoffTime() - C.GetBackoffTime());// freeze A
 				i = this->transmitS(C, i); // C transmits
+				C.selectBackoffTime(CW_0, 0);
 				arrival_times_C.pop(); // remove the first element
 			}
 			else if (A.GetBackoffTime() - C.GetBackoffTime() < 0) { // C has larger backoff time
 				C.SetBackoffTime(C.GetBackoffTime() - A.GetBackoffTime()); // freeze C
 				i = this->transmitS(A, i); // A transmits
+				A.selectBackoffTime(CW_0, 0);
 				arrival_times_A.pop(); // remove the first element
 			}
 			else if (A.GetBackoffTime() == C.GetBackoffTime()) { // A and C have similar backoff times
@@ -103,20 +118,20 @@ int channel::transmit(vector<station> &stations) {
 					A.selectBackoffTime(CW_0, this->collision);
 					C.selectBackoffTime(CW_0, this->collision);
 				}
-				if (A.GetBackoffTime() != C.GetBackoffTime()) {
+				//if (A.GetBackoffTime() != C.GetBackoffTime()) {
 
-					if (A.GetBackoffTime() - C.GetBackoffTime() > 0) { // A has larger backoff time, A freezes and C transmit
-						A.SetBackoffTime(A.GetBackoffTime() - C.GetBackoffTime());// freeze A
-						i = this->transmitS(C, i); // C transmits
-						arrival_times_C.pop(); // remove the first element
-					}
-					else if (A.GetBackoffTime() - C.GetBackoffTime() < 0) { // C has larger backoff time
-						C.SetBackoffTime(C.GetBackoffTime() - A.GetBackoffTime()); // freeze C
-						i = this->transmitS(A, i); // A transmits
-						arrival_times_A.pop(); // remove the first element
-					}
+				//	if (A.GetBackoffTime() - C.GetBackoffTime() > 0) { // A has larger backoff time, A freezes and C transmit
+				//		A.SetBackoffTime(A.GetBackoffTime() - C.GetBackoffTime());// freeze A
+				//		i = this->transmitS(C, i); // C transmits
+				//		arrival_times_C.pop(); // remove the first element
+				//	}
+				//	else if (A.GetBackoffTime() - C.GetBackoffTime() < 0) { // C has larger backoff time
+				//		C.SetBackoffTime(C.GetBackoffTime() - A.GetBackoffTime()); // freeze C
+				//		i = this->transmitS(A, i); // A transmits
+				//		arrival_times_A.pop(); // remove the first element
+				//	}
 
-				}
+				//}
 			}
 
 
