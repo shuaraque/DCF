@@ -17,7 +17,7 @@ public:
 	int readFile(string inputFile1, string inputFile2);
 
 	int startSimulation();
-
+	int writeToFile(string outFile);
 
 private:
 

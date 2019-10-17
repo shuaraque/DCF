@@ -94,7 +94,7 @@ int channel::transmit(vector<station> &stations) {
 			arrival_times_C.pop(); // remove the first element
 		}
 
-		if (C_arrival == true && C_arrival == true) {   // A and C tries to grab the channel
+		if (A_arrival == true && C_arrival == true) {   // A and C tries to grab the channel
 
 			//i += DIFS; // both sence the channel for DIFS
 
@@ -139,13 +139,14 @@ int channel::transmit(vector<station> &stations) {
 		}
 		A_arrival = false;
 		C_arrival = false;
-		i++;
+		
 
 	}
 
 
 
 
-
+	stations[0] = A;
+	stations[1] = C;
 	return 0;
 }

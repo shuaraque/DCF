@@ -19,13 +19,17 @@ int data1::readFile(string inputFile1, string inputFile2) {
 
 	while (!inFile1.eof()) {
 		inFile1 >> time;
-		A.SetArrivals(time);
+		if (!inFile1.eof()) {
+			A.SetArrivals(time);
+		}
 
 	}
 
 	while (!inFile2.eof()) {
 		inFile2 >> time;
-		C.SetArrivals(time);
+		if (!inFile2.eof()) {
+			C.SetArrivals(time);
+		}
 
 	}
 
@@ -43,4 +47,26 @@ int data1::startSimulation() {
 	obj.transmit(Stations_with_arrivals);
 
 	return 0;
+}
+
+int data1::writeToFile(string outFile) {
+	ofstream outF;
+	outF.open(outFile);
+	if (!outF.is_open()) {
+		cout << "Can't open file to write" << endl;
+	}
+	outF << "Station A successes= " << Stations_with_arrivals[0].GetnumSuccesses() << endl;
+	outF << "Station A collisions= " << Stations_with_arrivals[0].GetnumCollisions()<< endl;
+	outF << "A Throughput= " << ((double)Stations_with_arrivals[0].GetnumSuccesses()*12000.0 )/ double(SIM_TIME) << endl;
+	outF << endl;
+	outF << "**********************************************************************************************" << endl;
+	outF << endl;
+	outF << "Station C successes= " << Stations_with_arrivals[1].GetnumSuccesses() << endl;
+	outF << "Station C collisions= " << Stations_with_arrivals[1].GetnumCollisions() << endl;
+	outF << "C Throughput= " << ((double)Stations_with_arrivals[1].GetnumSuccesses()*12000.0) / double(SIM_TIME) << endl;
+
+	outF.close();
+
+	return 0;
+
 }
