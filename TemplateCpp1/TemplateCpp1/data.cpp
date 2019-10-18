@@ -44,7 +44,7 @@ int data1::readFile(string inputFile1, string inputFile2) {
 
 int data1::startSimulation() {
 
-	obj.transmit(Stations_with_arrivals);
+	obj.transmit_Ta_CSMACA(Stations_with_arrivals);
 
 	return 0;
 }
