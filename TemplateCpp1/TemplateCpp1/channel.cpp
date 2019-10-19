@@ -7,10 +7,8 @@ int channel::transmitS(station& x, int i) {
 	
 	i += DIFS; // sence the channel for DIFS
 
-	if (this->ch_status != Busy) {
-
 		i += x.GetBackoffTime(); // Backoff time
-	}
+	
 
 	i += Data_Frame_Size + SIFS + ACK; // sending a frame and receiving ack
 	x.success();
@@ -268,7 +266,8 @@ int channel::transmit_Ta_CSMACA_VCS(vector<station> &stations) {
 
 
 int channel::transmit_Tb_CSMACA(vector<station> &stations) { // FIXME
-
+	int A_timer = 1;
+	int C_timer = 1;
 	int i = 1;
 	station A = stations[0];
 	station C = stations[1];
@@ -279,19 +278,34 @@ int channel::transmit_Tb_CSMACA(vector<station> &stations) { // FIXME
 	queue<double> arrival_times_A = A.GetArrivals();
 	queue<double> arrival_times_C = C.GetArrivals();
 
-	if (ceil(arrival_times_A.front()) - ceil(arrival_times_C.front()) > 0) { // setting simulation timer
-		i = ceil(arrival_times_C.front()); // if arrival time of C is less that arrival time of A
-	}
-	else {
-		i = ceil(arrival_times_A.front()); // if arrival time of A is less that arrival time of C
-	}
+	
+		C_timer = ceil(arrival_times_C.front()); // if arrival time of C is less that arrival time of A
+	
+		A_timer = ceil(arrival_times_A.front()); // if arrival time of A is less that arrival time of C
+
 
 	A.selectBackoffTime(CW_0, 0); // select a random backoff time between 0 and 3
 	C.selectBackoffTime(CW_0, 0);
 
+	if (A_timer < C_timer) {
+		i = A_timer;
+	}
+	else
+	{
+		i = C_timer;
+	}
+
 	while (i <= SIM_TIME) { // simulation time 
+		C_timer = ceil(arrival_times_C.front()); // if arrival time of C is less that arrival time of A
 
-
+		A_timer = ceil(arrival_times_A.front()); // if arrival time of A is less that arrival time of C
+		if (A_timer < C_timer) {
+			i = A_timer;
+		}
+		else
+		{
+			i = C_timer;
+		}
 
 		if (arrival_times_A.size() != 0 && i >= ceil(arrival_times_A.front())) {
 			A_arrival = true; //  A has an arrival
@@ -309,7 +323,49 @@ int channel::transmit_Tb_CSMACA(vector<station> &stations) { // FIXME
 
 		if (A_arrival == true && C_arrival == false) { // A gets the channel
 
-			i = this->transmitS(A, i); // function for successful transmision
+			//i = this->transmitS(A, i); // function for successful transmision
+			A_timer += DIFS + A.GetBackoffTime();
+			A.SetA_transmission(A_timer);
+			A_timer += Data_Frame_Size + SIFS;
+			B.SetB_transmission(A_timer);
+			A_timer +=ACK;
+
+			C_timer += DIFS + C.GetBackoffTime();
+			C.SetC_transmission(C_timer);
+			C_timer += Data_Frame_Size + SIFS + ACK;
+
+			if (A.GetA_transmission() <= C.GetC_transmission() && A.GetA_transmission() + 100 > C.GetC_transmission()) {
+
+				A.collision();
+				C.collision();
+				A.Setcollision_CW(); // number of collisions
+				C.Setcollision_CW();
+				A.selectBackoffTime(CW_0, A.Getcollision_CW());
+				C.selectBackoffTime(CW_0, C.Getcollision_CW());
+			}
+			else if (B.GetA_transmission() < C.GetC_transmission()+100 && B.GetA_transmission() >= C.GetC_transmission())
+			{
+				C.collision();
+				C.Setcollision_CW();
+				C.selectBackoffTime(CW_0, C.Getcollision_CW());
+			}
+			else if (B.GetA_transmission() < A.GetC_transmission()+100 && B.GetA_transmission() >= A.GetC_transmission())
+			{
+				A.collision();
+				A.Setcollision_CW();
+				A.selectBackoffTime(CW_0, A.Getcollision_CW());
+			}
+
+
+
+
+
+
+
+
+
+
+
 			A.Resetcollision_CW();
 			A.selectBackoffTime(CW_0, 0);
 			arrival_times_A.pop(); // remove the first element

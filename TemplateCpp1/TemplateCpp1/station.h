@@ -39,6 +39,17 @@ public:
 	void Setcollision_CW() { this->collision_CW += 1; }
 	void Resetcollision_CW() { this->collision_CW = 0; }
 	int Getcollision_CW() { return this->collision_CW; }
+
+
+
+	void SetA_transmission(int num) { this->A_transmission = num; }
+	int GetA_transmission() { return this->A_transmission; }
+
+	void SetC_transmission(int num) { this->C_transmission = num; }
+	int GetC_transmission() { return this->C_transmission; }
+
+	void SetB_transmission(int num) { this->B_transmission = num; }
+	int GetB_transmission() { return this->B_transmission; }
 protected:
 	int backoffTime; // backoff time
 	queue <double> arrivals; // frames arrival times
@@ -46,6 +57,11 @@ protected:
 	int numSuccesses;// counter for successes
 	int collision_CW; 
 
+
+	int A_transmission;
+	int C_transmission;
+
+	int B_transmission;
 };
 
 

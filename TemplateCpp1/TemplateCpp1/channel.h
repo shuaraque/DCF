@@ -37,6 +37,8 @@ protected:
 	int RTC;
 	int CTC;
 
+	station B;
+
 };
 
 
