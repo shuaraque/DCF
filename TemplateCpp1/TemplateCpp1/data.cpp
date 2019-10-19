@@ -1,7 +1,8 @@
 #include"data.h"
 
 
-int data1::readFile(string inputFile1, string inputFile2) {
+int data1::readFile(string inputFile1, string inputFile2, string outputFile) {
+	this->outPutFile = outputFile;
 	station A;
 	station C;
 	double time = 0.0;
@@ -33,8 +34,10 @@ int data1::readFile(string inputFile1, string inputFile2) {
 
 	}
 
-	Stations_with_arrivals.push_back(A);
-	Stations_with_arrivals.push_back(C);
+	Stations_with_arrivals_Ta.push_back(A);
+	Stations_with_arrivals_Ta.push_back(C);
+
+	Stations_with_arrivals_Ta_VCS=Stations_with_arrivals_Ta;
 	inFile1.close();
 	inFile2.close();
 
@@ -43,27 +46,31 @@ int data1::readFile(string inputFile1, string inputFile2) {
 
 
 int data1::startSimulation() {
-
-	obj.transmit_Ta_CSMACA(Stations_with_arrivals);
+	// a1
+	//obj.transmit_Ta_CSMACA(Stations_with_arrivals_Ta);
+	//this->writeToFile(outPutFile, Stations_with_arrivals_Ta);
+	//a2
+	obj.transmit_Ta_CSMACA_VCS(Stations_with_arrivals_Ta_VCS);
+	this->writeToFile(outPutFile, Stations_with_arrivals_Ta_VCS);
 
 	return 0;
 }
 
-int data1::writeToFile(string outFile) {
+int data1::writeToFile(string outFile, vector <station> &StationX) {
 	ofstream outF;
 	outF.open(outFile);
 	if (!outF.is_open()) {
 		cout << "Can't open file to write" << endl;
 	}
-	outF << "Station A successes= " << Stations_with_arrivals[0].GetnumSuccesses() << endl;
-	outF << "Station A collisions= " << Stations_with_arrivals[0].GetnumCollisions()<< endl;
-	outF << "A Throughput= " << ((double)Stations_with_arrivals[0].GetnumSuccesses()*12000.0 )/ double(10) << endl;
+	outF << "Station A successes= " << StationX[0].GetnumSuccesses() << endl;
+	outF << "Station A collisions= " << StationX[0].GetnumCollisions()<< endl;
+	outF << "A Throughput= " << ((double)StationX[0].GetnumSuccesses()*12000.0 )/ double(10) << endl;
 	outF << endl;
-	outF << "**********************************************************************************************" << endl;
+	outF << "*****************************************************************" << endl;
 	outF << endl;
-	outF << "Station C successes= " << Stations_with_arrivals[1].GetnumSuccesses() << endl;
-	outF << "Station C collisions= " << Stations_with_arrivals[1].GetnumCollisions() << endl;
-	outF << "C Throughput= " << ((double)Stations_with_arrivals[1].GetnumSuccesses()*12000.0) / double(10) << endl;
+	outF << "Station C successes= " << StationX[1].GetnumSuccesses() << endl;
+	outF << "Station C collisions= " << StationX[1].GetnumCollisions() << endl;
+	outF << "C Throughput= " << ((double)StationX[1].GetnumSuccesses()*12000.0) / double(10) << endl;
 
 	outF.close();
 
