@@ -38,6 +38,7 @@ int data1::readFile(string inputFile1, string inputFile2, string outputFile) {
 	Stations_with_arrivals_Ta.push_back(C);
 
 	Stations_with_arrivals_Ta_VCS=Stations_with_arrivals_Ta;
+	Stations_with_arrivals_Tb = Stations_with_arrivals_Ta;
 	inFile1.close();
 	inFile2.close();
 
@@ -50,8 +51,13 @@ int data1::startSimulation() {
 	//obj.transmit_Ta_CSMACA(Stations_with_arrivals_Ta);
 	//this->writeToFile(outPutFile, Stations_with_arrivals_Ta);
 	//a2
-	obj.transmit_Ta_CSMACA_VCS(Stations_with_arrivals_Ta_VCS);
-	this->writeToFile(outPutFile, Stations_with_arrivals_Ta_VCS);
+	//obj.transmit_Ta_CSMACA_VCS(Stations_with_arrivals_Ta_VCS);
+	//this->writeToFile(outPutFile, Stations_with_arrivals_Ta_VCS);
+	//b1
+	obj.transmit_Tb_CSMACA(Stations_with_arrivals_Tb);
+	this->writeToFile(outPutFile, Stations_with_arrivals_Tb);
+
+
 
 	return 0;
 }

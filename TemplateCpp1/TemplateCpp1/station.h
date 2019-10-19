@@ -48,8 +48,11 @@ public:
 	void SetC_transmission(int num) { this->C_transmission = num; }
 	int GetC_transmission() { return this->C_transmission; }
 
-	void SetB_transmission(int num) { this->B_transmission = num; }
-	int GetB_transmission() { return this->B_transmission; }
+	void SetB_transmission_To_A(int num) { this->B_transmission_To_A = num; }
+	int GetB_transmission_To_A() { return this->B_transmission_To_A; }
+
+	void SetB_transmission_To_C(int num) { this->B_transmission_To_C = num; }
+	int GetB_transmission_To_C() { return this->B_transmission_To_C; }
 protected:
 	int backoffTime; // backoff time
 	queue <double> arrivals; // frames arrival times
@@ -61,7 +64,8 @@ protected:
 	int A_transmission;
 	int C_transmission;
 
-	int B_transmission;
+	int B_transmission_To_A;
+	int B_transmission_To_C;
 };
 
 
