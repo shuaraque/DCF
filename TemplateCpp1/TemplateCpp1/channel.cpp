@@ -589,10 +589,9 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 
 				A_timer += DIFS + A.GetBackoffTime();
 				A.SetA_transmission(A_timer);
-				A_timer += Data_Frame_Size + SIFS;
-				B.SetB_transmission_To_A(A_timer); // this the time when B start sending Ack
-				A_timer += ACK;
-
+				A_timer += SIFS;
+				B.SetB_transmission_To_A(A_timer); // This is when B send CTS to A
+				//A_timer += SIFS+CTS + SIFS + Data_Frame_Size + SIFS + ACK;
 
 
 				// now C sends
@@ -605,9 +604,9 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 				else {
 					C_timer += DIFS + C.GetBackoffTime();
 					C.SetC_transmission(C_timer);
-					C_timer += Data_Frame_Size + SIFS;
-					B.SetB_transmission_To_C(C_timer);
-					C_timer += ACK;
+					C_timer += SIFS;
+					B.SetB_transmission_To_C(C_timer); // This is when B send CTS to A
+					C_timer += CTS + SIFS + Data_Frame_Size + SIFS + ACK;
 
 					if ((A.GetA_transmission() <= C.GetC_transmission() && A.GetA_transmission() + 100 > C.GetC_transmission())
 						|| (C.GetC_transmission() <= A.GetA_transmission() && C.GetC_transmission() + 100 > A.GetA_transmission())) {
