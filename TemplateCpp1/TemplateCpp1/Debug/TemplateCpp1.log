@@ -1,2 +1,8 @@
-﻿  main.cpp
+﻿  channel.cpp
+d:\desktop\fall2019\ece578\project#1\templatecpp1\templatecpp1\channel.cpp(67): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\desktop\fall2019\ece578\project#1\templatecpp1\templatecpp1\channel.cpp(70): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\desktop\fall2019\ece578\project#1\templatecpp1\templatecpp1\channel.cpp(171): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\desktop\fall2019\ece578\project#1\templatecpp1\templatecpp1\channel.cpp(174): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\desktop\fall2019\ece578\project#1\templatecpp1\templatecpp1\channel.cpp(282): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\desktop\fall2019\ece578\project#1\templatecpp1\templatecpp1\channel.cpp(284): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
   TemplateCpp1.vcxproj -> D:\Desktop\Fall2019\ECE578\project#1\TemplateCpp1\Debug\TemplateCpp1.exe
