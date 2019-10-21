@@ -540,9 +540,22 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 	C.selectBackoffTime(CW_0, 0);
 
 
-	while (i <= SIM_TIME) { // simulation time 
+	while (i <= SIM_TIME) { // simulation time +++-
 
+		if (A_timer >= SIM_TIME || C_timer >= SIM_TIME) break;
 
+		if (A_timer >= ceil(arrival_times_A.front())) {
+			//
+		}
+		else {
+			A_timer = ceil(arrival_times_A.front());
+		}
+		if (C_timer >= ceil(arrival_times_C.front())) {
+			//
+		}
+		else {
+			C_timer = ceil(arrival_times_C.front());
+		}
 
 		if (arrival_times_A.size() != 0) {
 			A_arrival = true; //  A has an arrival
@@ -567,6 +580,7 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 			A_timer += CTS + SIFS + Data_Frame_Size + SIFS + ACK;
 			A.Resetcollision_CW();
 			A.selectBackoffTime(CW_0, 0);
+			A.success();
 			arrival_times_A.pop(); // remove the first element
 		}
 		if (C_arrival == true && A_arrival == false) {  // C gets the channel
@@ -578,6 +592,7 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 			C_timer += CTS + SIFS + Data_Frame_Size + SIFS + ACK;
 			C.Resetcollision_CW();
 			C.selectBackoffTime(CW_0, 0);
+			C.success();
 			arrival_times_C.pop(); // remove the first element
 		}
 
@@ -601,7 +616,9 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 					A.Resetcollision_CW();
 					A.selectBackoffTime(CW_0, 0);
 					arrival_times_A.pop(); // remove the first element
-					C_timer = A_timer;
+					if (C_timer < ceil(arrival_times_A.front())) {
+						C_timer = A_timer;
+					}
 				}
 				else {
 					C_timer += DIFS + C.GetBackoffTime();
@@ -623,36 +640,58 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 						A.selectBackoffTime(CW_0, A.Getcollision_CW());
 						C.selectBackoffTime(CW_0, C.Getcollision_CW());
 					}
-					else if (B.GetB_transmission_To_A() <= C.GetC_transmission() && B.GetA_transmission() + 2 > C.GetC_transmission())
-					{
-						C.collision();
-						C.Setcollision_CW();
-						C.selectBackoffTime(CW_0, C.Getcollision_CW());
-					}
-					else if (B.GetB_transmission_To_C() <= A.GetA_transmission() && B.GetB_transmission_To_C() + 2 > A.GetA_transmission())
-					{
+
+					else if ((B.GetB_transmission_To_C() <= A.GetA_transmission() && B.GetB_transmission_To_C() + 2 > A.GetA_transmission())
+						|| (B.GetB_transmission_To_C() >= A.GetA_transmission() && B.GetB_transmission_To_C() < A.GetA_transmission() + 2)) {
+
 						A.collision();
 						A.Setcollision_CW();
 						A.selectBackoffTime(CW_0, A.Getcollision_CW());
+
+						A_timer = C_timer;
+						C.success();
+						C.Resetcollision_CW();
+						C.selectBackoffTime(CW_0, 0);
+						arrival_times_C.pop(); // remove the first element
+
 					}
-					else {
-						if (A_timer < C_timer) {
-							A.success();
-							A.Resetcollision_CW();
-							A.selectBackoffTime(CW_0, 0);
-							arrival_times_A.pop(); // remove the first element
-							//C_timer -= (DIFS + C.GetBackoffTime() + Data_Frame_Size + SIFS + ACK);
-						}
-						else {
-							C.success();
-							C.Resetcollision_CW();
-							C.selectBackoffTime(CW_0, 0);
-							arrival_times_C.pop(); // remove the first element
-							//A_timer -= (DIFS + A.GetBackoffTime() + Data_Frame_Size + SIFS + ACK);
-						}
+					else if ((B.GetB_transmission_To_A() <= C.GetC_transmission() && B.GetB_transmission_To_A() + 2 > C.GetC_transmission())
+						|| (B.GetB_transmission_To_A() >= C.GetC_transmission() && B.GetB_transmission_To_A() < C.GetC_transmission() + 2)) {
+
+						C.collision();
+						C.Setcollision_CW();
+						C.selectBackoffTime(CW_0, A.Getcollision_CW());
+
+						C_timer = A_timer;
+
+						A.success();
+						A.Resetcollision_CW();
+						A.selectBackoffTime(CW_0, 0);
+						arrival_times_A.pop(); // remove the first element
+
+					}
+					else if (B.GetB_transmission_To_A() + 2 <= C.GetC_transmission()) {
+						A.success();
+						A.Resetcollision_CW();
+						A.selectBackoffTime(CW_0, 0);
+						arrival_times_A.pop(); // remove the first element
+						C.SetBackoffTime(C.GetC_transmission() - B.GetB_transmission_To_A());
+						C_timer = A_timer;
+					}
+
+					else if (B.GetB_transmission_To_C() + 2 <= A.GetA_transmission()) {
+						C.success();
+						C.Resetcollision_CW();
+						C.selectBackoffTime(CW_0, 0);
+						arrival_times_C.pop(); // remove the first element
+						A.SetBackoffTime(A.GetA_transmission() - B.GetB_transmission_To_C());
+						A_timer = C_timer;
 					}
 				}
 			}
+
+
+
 			else if (A_timer > C_timer) { // C sends first
 
 				C_timer += DIFS + C.GetBackoffTime();
@@ -669,7 +708,9 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 					C.Resetcollision_CW();
 					C.selectBackoffTime(CW_0, 0);
 					arrival_times_C.pop(); // remove the first element
-					A_timer = C_timer;
+					if (A_timer < ceil(arrival_times_C.front())) {
+						A_timer = C_timer;
+					}
 				}
 				else {
 					A_timer += DIFS + A.GetBackoffTime();
@@ -692,28 +733,69 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 						A.selectBackoffTime(CW_0, A.Getcollision_CW());
 						C.selectBackoffTime(CW_0, C.Getcollision_CW());
 					}
-					else if (B.GetB_transmission_To_C() <= A.GetA_transmission() && B.GetB_transmission_To_C() + 2 > A.GetA_transmission())
-					{
+
+					else if ((B.GetB_transmission_To_C() <= A.GetA_transmission() && B.GetB_transmission_To_C() + 2 > A.GetA_transmission())
+						|| (B.GetB_transmission_To_C() >= A.GetA_transmission() && B.GetB_transmission_To_C() < A.GetA_transmission()+2)) {
+
 						A.collision();
 						A.Setcollision_CW();
 						A.selectBackoffTime(CW_0, A.Getcollision_CW());
+
+						A_timer = C_timer;
+						C.success();
+						C.Resetcollision_CW();
+						C.selectBackoffTime(CW_0, 0);
+						arrival_times_C.pop(); // remove the first element
+
 					}
-					else {
-						if (A_timer < C_timer) {
-							A.success();
-							A.Resetcollision_CW();
-							A.selectBackoffTime(CW_0, 0);
-							arrival_times_A.pop(); // remove the first element
-							//C_timer -= (DIFS + C.GetBackoffTime() + Data_Frame_Size + SIFS + ACK);
-						}
-						else {
-							C.success();
-							C.Resetcollision_CW();
-							C.selectBackoffTime(CW_0, 0);
-							arrival_times_C.pop(); // remove the first element
-							//A_timer -= (DIFS + A.GetBackoffTime() + Data_Frame_Size + SIFS + ACK);
-						}
+					else if ((B.GetB_transmission_To_A() <= C.GetC_transmission() && B.GetB_transmission_To_A() + 2 > C.GetC_transmission())
+						|| (B.GetB_transmission_To_A() >= C.GetC_transmission() && B.GetB_transmission_To_A() < C.GetC_transmission() + 2)) {
+
+						C.collision();
+						C.Setcollision_CW();
+						C.selectBackoffTime(CW_0, A.Getcollision_CW());
+
+						C_timer = A_timer;
+
+						A.success();
+						A.Resetcollision_CW();
+						A.selectBackoffTime(CW_0, 0);
+						arrival_times_A.pop(); // remove the first element
+
 					}
+					else if (B.GetB_transmission_To_A() + 2 <= C.GetC_transmission()) {
+						A.success();
+						A.Resetcollision_CW();
+						A.selectBackoffTime(CW_0, 0);
+						arrival_times_A.pop(); // remove the first element
+						C.SetBackoffTime(C.GetC_transmission() - B.GetB_transmission_To_A());
+						C_timer = A_timer;
+					}
+
+					else if (B.GetB_transmission_To_C() + 2 <= A.GetA_transmission()) {
+						C.success();
+						C.Resetcollision_CW();
+						C.selectBackoffTime(CW_0, 0);
+						arrival_times_C.pop(); // remove the first element
+						A.SetBackoffTime(A.GetA_transmission() - B.GetB_transmission_To_C());
+						A_timer = C_timer;
+					}
+					//else {
+					//	if (A_timer < C_timer) {
+					//		A.success();
+					//		A.Resetcollision_CW();
+					//		A.selectBackoffTime(CW_0, 0);
+					//		arrival_times_A.pop(); // remove the first element
+					//		//C_timer -= (DIFS + C.GetBackoffTime() + Data_Frame_Size + SIFS + ACK);
+					//	}
+					//	else {
+					//		C.success();
+					//		C.Resetcollision_CW();
+					//		C.selectBackoffTime(CW_0, 0);
+					//		arrival_times_C.pop(); // remove the first element
+					//		//A_timer -= (DIFS + A.GetBackoffTime() + Data_Frame_Size + SIFS + ACK);
+					//	}
+					//}
 
 
 				}
@@ -736,9 +818,27 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 				B.SetB_transmission_To_C(C_timer); // This is when B send CTS to A
 				C_timer += CTS + SIFS + Data_Frame_Size + SIFS + ACK;
 
+				// now C sends
+				if (B.GetB_transmission_To_A() + 2 <= C.GetC_transmission()) {
+					A.success();
+					A.Resetcollision_CW();
+					A.selectBackoffTime(CW_0, 0);
+					arrival_times_A.pop(); // remove the first element
+					C.SetBackoffTime(C.GetC_transmission() - B.GetB_transmission_To_A());
+					C_timer = A_timer;
+				}
 
+				else if (B.GetB_transmission_To_C() + 2 <= A.GetA_transmission()) {
+					C.success();
+					C.Resetcollision_CW();
+					C.selectBackoffTime(CW_0, 0);
+					arrival_times_C.pop(); // remove the first element
+					A.SetBackoffTime(A.GetA_transmission() - B.GetB_transmission_To_C());
+					A_timer = C_timer;
+				}
+					
 
-				if ((A.GetA_transmission() <= C.GetC_transmission() && A.GetA_transmission() + 2 > C.GetC_transmission())
+				else if ((A.GetA_transmission() <= C.GetC_transmission() && A.GetA_transmission() + 2 > C.GetC_transmission())
 					|| (C.GetC_transmission() <= A.GetA_transmission() && C.GetC_transmission() + 2 > A.GetA_transmission())) {
 
 					A_timer -= (SIFS + Data_Frame_Size + SIFS + ACK);
@@ -752,32 +852,50 @@ int channel::transmit_Tb_CSMACA_VCS(vector<station> &stations) { //FIXME
 					C.selectBackoffTime(CW_0, C.Getcollision_CW());
 
 				}
-				else if (B.GetB_transmission_To_C() + 2 < A.GetA_transmission()) { // C wins
-					C.success();
-					C.Resetcollision_CW();
-					C.selectBackoffTime(CW_0, 0);
-					arrival_times_C.pop(); // remove the first element
-					A_timer = C_timer;
+				//else if (B.GetB_transmission_To_C() + 2 < A.GetA_transmission()) { // C wins
+				//	C.success();
+				//	C.Resetcollision_CW();
+				//	C.selectBackoffTime(CW_0, 0);
+				//	arrival_times_C.pop(); // remove the first element
+				//	A_timer = C_timer;
 
-				}
-				else if (B.GetB_transmission_To_A() + 2 < C.GetC_transmission()) {// A wins
-					A.success();
-					A.Resetcollision_CW();
-					A.selectBackoffTime(CW_0, 0);
-					arrival_times_A.pop(); // remove the first element
-					C_timer = A_timer;
+				//}
+				//else if (B.GetB_transmission_To_A() + 2 < C.GetC_transmission()) {// A wins
+				//	A.success();
+				//	A.Resetcollision_CW();
+				//	A.selectBackoffTime(CW_0, 0);
+				//	arrival_times_A.pop(); // remove the first element
+				//	C_timer = A_timer;
 
-				}
+				//}
 
 				else if ((B.GetB_transmission_To_C() <= A.GetA_transmission() && B.GetB_transmission_To_C() + 2 > A.GetA_transmission())
-					|| (A.GetA_transmission() <= B.GetB_transmission_To_C() && A.GetA_transmission() + 2 > B.GetB_transmission_To_C())) {
+					|| (B.GetB_transmission_To_C() >= A.GetA_transmission() && B.GetB_transmission_To_C() < A.GetA_transmission() + 2)) {
 
 					A.collision();
 					A.Setcollision_CW();
 					A.selectBackoffTime(CW_0, A.Getcollision_CW());
 
-					A_timer -= (SIFS + Data_Frame_Size + SIFS + ACK);
+					A_timer = C_timer;
+					C.success();
+					C.Resetcollision_CW();
+					C.selectBackoffTime(CW_0, 0);
+					arrival_times_C.pop(); // remove the first element
 
+				}
+				else if ((B.GetB_transmission_To_A() <= C.GetC_transmission() && B.GetB_transmission_To_A() + 2 > C.GetC_transmission())
+					|| (B.GetB_transmission_To_A() >= C.GetC_transmission() && B.GetB_transmission_To_A() < C.GetC_transmission() + 2)) {
+
+					C.collision();
+					C.Setcollision_CW();
+					C.selectBackoffTime(CW_0, A.Getcollision_CW());
+
+					C_timer = A_timer;
+
+					A.success();
+					A.Resetcollision_CW();
+					A.selectBackoffTime(CW_0, 0);
+					arrival_times_A.pop(); // remove the first element
 
 				}
 
